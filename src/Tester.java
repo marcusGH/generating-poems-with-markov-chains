@@ -1,3 +1,5 @@
+import edu.stanford.nlp.util.Pair;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,11 +36,20 @@ public class Tester {
         System.out.println(wordCount); // for -debug
         System.out.println(wordCount.size()); // for -debug
 
-        Set<List<String>> somePoems = new HashSet<>(new ArrayList<List<String>>(poems).subList(0, 90));
+        Set<List<String>> somePoems = new HashSet<>(new ArrayList<List<String>>(poems).subList(0, 180));
 
         // implementation
         MarkovChain mc = new MarkovChain(somePoems);
-        System.out.println(mc.generatePoem(100000, 0.9));
+//        System.out.println(mc.generatePoem(100000, 0.9));
+
+        Map<String, List<Pair<String, Double>>> firstOrders = mc.firstOrders();
+        Map<MCState, ArrayList<Pair<String, Double>>> secondOrders = mc.secondOrders();
+
+        System.out.println(firstOrders);
+        System.out.println(secondOrders);
+
+        mc.generateJSDictionary();
+
     }
 
 

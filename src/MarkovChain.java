@@ -1,5 +1,8 @@
 import edu.stanford.nlp.util.Pair;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class MarkovChain {
@@ -18,6 +21,78 @@ public class MarkovChain {
 //    private ArrayList<String> makeList(String ... strings) {
 //        return new ArrayList<>(Arrays.asList(strings));
 //    }
+
+    public Map<String, List<Pair<String, Double>>> firstOrders() {
+        return this.transitionProbabilities.first;
+    }
+
+    public Map<MCState, ArrayList<Pair<String, Double>>> secondOrders() {
+        return this.transitionProbabilities.second;
+    }
+
+    public void generateJSDictionary() throws IOException {
+        // create the files
+        final String dataDirectory = "website/data/";
+        File f1 = new File(dataDirectory + "firstOrder.js");
+        File f2 = new File(dataDirectory + "secondOrder.js");
+        if (f1.createNewFile()) {
+            System.out.println("File created: " + f1.getName());
+        }
+        else
+            System.out.println("Did not create file because it already exists");
+        if (f2.createNewFile()) {
+            System.out.println("File created: " + f2.getName());
+        }
+        else
+            System.out.println("Did not create file because it already exists");
+
+        // write to the files
+        FileWriter fw1 = new FileWriter(f1.getAbsolutePath());
+        FileWriter fw2 = new FileWriter(f2.getAbsolutePath());
+
+        // get the dictionaries
+        Map<String, List<Pair<String, Double>>> firstOrders = this.firstOrders();
+        Map<MCState, ArrayList<Pair<String, Double>>> secondOrders = this.secondOrders();
+
+        // make first orders first
+        fw1.write("var firstOrder = {\n");
+        for (String key : firstOrders.keySet()) {
+            fw1.write('"' + key.replace("\n","\\n") + "\":");
+            StringBuilder value = new StringBuilder("[");
+            for (Pair<String,Double> val : firstOrders.get(key)) {
+                value.append("[\"").append(val.first.replace("\n","\\n")).append("\",").append(val.second).append("],");
+            }
+            // delete last comma
+            value.deleteCharAt(value.length() - 1);
+            value.append("]");
+            // write the value to the key
+            fw1.write(value.toString() + ",\n");
+        }
+        fw1.write("\"REMOVEME\":[[\"WILL DO\", 1.0]]\n");
+        fw1.write("};\n\n\n\n\n");
+        fw1.close();
+
+        // no write secondOrders
+        fw2.write("var secondOrder = {\n");
+        for (MCState key : secondOrders.keySet()) {
+            // write the key
+            fw2.write("\"" + key.first().replace("\n","\\n") + " " +
+                    key.second().replace("\n", "\\n") + "\":");
+            // build the value
+            StringBuilder value = new StringBuilder("[");
+            for (Pair<String,Double> val : secondOrders.get(key)) {
+                value.append("[\"").append(val.first.replace("\n","\\n")).append("\",").append(val.second).append("],");
+            }
+            // delete last comma
+            value.deleteCharAt(value.length() - 1);
+            value.append("]");
+            // write the value to the key
+            fw2.write(value.toString() + ",\n");
+        }
+        fw2.write("\"REMOVEME REMOVEME\":[[\"WILL DO\", 1.0]]\n");
+        fw2.write("};\n\n\n\n\n");
+        fw2.close();
+    }
 
     public Pair<Map<String, List<Pair<String, Double>>>, Map<MCState, ArrayList<Pair<String, Double>>>> getTransitionProbabilities(Set<List<String>>  poems) {
         // transitions from this state

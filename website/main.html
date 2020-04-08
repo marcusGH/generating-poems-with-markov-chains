@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Generating English Poems with Markov Chains</h1>
+
+<button id="nextLine">Next Line</button>
+<br>
+Order slider (all left means only 1st order, all right means only 2nd order markov chains)
+<div class="slidecontainer">
+  <input type="range" min="0" max="1" value="0.9" step="0.01" class="slider" id="alpha">
+</div>
+<br>
+Minimum line length
+<input type="number" id="minLineLength" name="minLineLength" min="1" value="8">
+<br>
+Maximum line length
+<input type="number" id="maxLineLength" name="maxLineLength" min="1" value="18">
+<br>
+Maximum rhyme list length
+<input type="number" id="rhymeListLength" name="rhymeListLength" min="0" value="200">
+<br>
+Number of paths searched
+<input type="number" id="pathNum" name="pathNum" min="1" value="10000">
+<br>
+Rhyme pattern
+<select id="rhymePattern">
+	<option value="pair">Pair rhymes</option>
+	<option value="cross">Cross rhymes</option>
+</select>
+
+<br>
+<textarea id="textarea" rows="80" cols="160"></textarea>
+
+<!-- necessary scripts -->
+<script src="data/firstOrder.js"></script>
+<script src="data/secondOrder.js"></script>
+<script src="packages/cmu-pronouncing-dictionary.js"></script>
+<script src="packages/rhymes.js"></script>
+
+<!-- and finally our own scripts -->
+<script src="scripts/script.js"></script>
+</body>
+</html>

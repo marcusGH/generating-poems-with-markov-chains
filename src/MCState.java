@@ -71,4 +71,12 @@ public class MCState {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        for (String s : this.words)
+            ret.append(s).append(" ");
+        return ret.toString();
+    }
+
 }
