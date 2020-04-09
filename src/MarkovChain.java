@@ -32,7 +32,7 @@ public class MarkovChain {
 
     public void generateJSDictionary() throws IOException {
         // create the files
-        final String dataDirectory = "website/data/";
+        final String dataDirectory = "website/data2/";
         File f1 = new File(dataDirectory + "firstOrder.js");
         File f2 = new File(dataDirectory + "secondOrder.js");
         if (f1.createNewFile()) {

@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Tester {
-    static final Path dataDirectory = Paths.get("data/gutenberg");
+    static final Path dataDirectory = Paths.get("data/formatted-poems/");
 
     public static void main(String[] args) throws IOException {
         Set<Path> poemFiles = Files.walk(dataDirectory).filter(Files::isRegularFile).collect(Collectors.toSet());
@@ -39,7 +39,7 @@ public class Tester {
         Set<List<String>> somePoems = new HashSet<>(new ArrayList<List<String>>(poems).subList(0, 180));
 
         // implementation
-        MarkovChain mc = new MarkovChain(somePoems);
+        MarkovChain mc = new MarkovChain(poems);
 //        System.out.println(mc.generatePoem(100000, 0.9));
 
         Map<String, List<Pair<String, Double>>> firstOrders = mc.firstOrders();

@@ -52,9 +52,9 @@ function rhymesWith(token, rhymeList) {
 	return false
 }
 
-function dfs(rhymeWord, rhymeDic, path, minLength, maxLength) {
+function dfs(prevWord, rhymeWord, rhymeDic, path, minLength, maxLength) {
 	// figure out the keys
-	var firstOrderKey = path.length == 0 ? rhymeWord : path[path.length - 1]
+	var firstOrderKey = path.length == 0 ? prevWord : path[path.length - 1]
 	var secondOrderKey = path.length >= 2 ? path[path.length - 2] + " " +
 		path[path.length - 1] : false
 
@@ -79,7 +79,8 @@ function dfs(rhymeWord, rhymeDic, path, minLength, maxLength) {
 		else if (firstOrderKey + '\n' in firstOrder)
 			dist = firstOrder[firstOrderKey + '\n']
 		else {
-			console.error("SHIT! This is NOT supposed to happen!")
+			// console.error("Could not find key k=" + firstOrderKey + " in firstOrder")
+			// resort to default
 			dist = firstOrder[""]
 		}
 		nextWord = pickFromDist(dist)
@@ -96,7 +97,7 @@ function dfs(rhymeWord, rhymeDic, path, minLength, maxLength) {
 	}
 	// otherwise if we can still remain in bounds, keep searching
 	else if (path.length < maxLength) {
-		return dfs(rhymeWord, rhymeDic, nextPath, minLength, maxLength)
+		return dfs("", rhymeWord, rhymeDic, nextPath, minLength, maxLength)
 	}
 	// otherwise abort
 	else
@@ -148,7 +149,7 @@ function getNextLine(penLastLine, lastLine, pairRhyme, evenLine) {
 
 	var nextLineList = []
 	for (var i = 0; i < numPaths; i++) {
-		var res = dfs(rhymeWord, rhymeListTemp, [], minLength, maxLength)
+		var res = dfs(prevWord, rhymeWord, rhymeListTemp, [], minLength, maxLength)
 		// store result
 		if (res.length > 0) {
 			nextLineList = res
@@ -170,7 +171,7 @@ function getNextLine(penLastLine, lastLine, pairRhyme, evenLine) {
 	// didn't find anything so just ignore rhyming
 	if (nextLineList.length == 0) {
 		console.log("didn't find any words rhyming with " + rhymeWord)
-		nextLineList = dfs("", rhymeListTemp, [], minLength, maxLength)
+		nextLineList = dfs(prevWord, "", rhymeListTemp, [], minLength, maxLength)
 		// reset rhyme counters
 		if (evenLine)
 			needEvenRhyme = true
