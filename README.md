@@ -4,8 +4,23 @@ I used poem collections from [Project Gutenberg](https://www.gutenberg.org/) to 
 
 ## Example poem
 
-...
-
+```
+this child of his eyes the
+same they said is king so the good
+man thought twere pity he should
+have kept nigh half the time
+of nor ask for has lime
+in sight clear as heaven may
+man put on defeat as t were a day
+and show that this is today
+a can experiment is that conquers
+might with dian ear make bold
+to scorn and as she wills with carpets of gold
+and blithe fair face ye are
+mad ye have gone acrosst the bar
+of seas far away and more
+than one close joy i see before
+```
 ## How to use
 
 Demo available at https://marcusgh.github.io/poem-generator/main.html. Click the "Next Line" button to generate a line of poetry.
