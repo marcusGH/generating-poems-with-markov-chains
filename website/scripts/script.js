@@ -1,19 +1,22 @@
 var bodyEl = document.querySelector("body")
 var nextLineEl = bodyEl.querySelector("button#nextLine")
-var alphaEl = bodyEl.querySelector("#alpha")
+var alphaEl = bodyEl.querySelector("input#alpha")
 var textAreaEl = bodyEl.querySelector("#textarea")
 var minLengthEl = bodyEl.querySelector("#minLineLength")
 var maxLengthEl = bodyEl.querySelector("#maxLineLength")
 var rhymeListLengthEl = bodyEl.querySelector("#rhymeListLength")
 var numPathsEl = bodyEl.querySelector("#pathNum")
 var rhymePatternEl = bodyEl.querySelector("#rhymePattern")
+var clearButtonEl = bodyEl.querySelector('#clear')
+var sliderEl = bodyEl.querySelector('.slider')
+var sliderValueEl = bodyEl.querySelector('span#alpha')
 
 /* returns whether the word ends with a newline character */
 function isEOL(text) {
 	bool = text.endsWith("\n") || text.endsWith("\r") || text.endsWith("\r\n")
 	return bool
 }
- 
+
 // global variables
 var alpha = -1
 var minLength = -1
@@ -52,11 +55,12 @@ function rhymesWith(token, rhymeList) {
 	return false
 }
 
-function dfs(prevWord, rhymeWord, rhymeDic, path, minLength, maxLength) {
+function dfs(prevPrevWord, prevWord, rhymeWord, rhymeDic, path, minLength, maxLength) {
 	// figure out the keys
 	var firstOrderKey = path.length == 0 ? prevWord : path[path.length - 1]
-	var secondOrderKey = path.length >= 2 ? path[path.length - 2] + " " +
-		path[path.length - 1] : false
+	var secondOrderKey = path.length >= 2 ?
+        path[path.length - 2] + " " + path[path.length - 1] : (
+        prevPrevWord != "" ? prevPrevWord + " " + prevWord : false)
 
 	var randNum = Math.random()
 	var nextWord = "NOWORDFOUND"
@@ -79,9 +83,10 @@ function dfs(prevWord, rhymeWord, rhymeDic, path, minLength, maxLength) {
 		else if (firstOrderKey + '\n' in firstOrder)
 			dist = firstOrder[firstOrderKey + '\n']
 		else {
-			// console.error("Could not find key k=" + firstOrderKey + " in firstOrder")
 			// resort to default
-			dist = firstOrder[""]
+			// dist = firstOrder[""]
+            // give up if not path found
+            return []
 		}
 		nextWord = pickFromDist(dist)
 	}
@@ -97,7 +102,7 @@ function dfs(prevWord, rhymeWord, rhymeDic, path, minLength, maxLength) {
 	}
 	// otherwise if we can still remain in bounds, keep searching
 	else if (path.length < maxLength) {
-		return dfs("", rhymeWord, rhymeDic, nextPath, minLength, maxLength)
+		return dfs(prevWord, nextWord, rhymeWord, rhymeDic, nextPath, minLength, maxLength)
 	}
 	// otherwise abort
 	else
@@ -120,7 +125,7 @@ function getNextLine(penLastLine, lastLine, pairRhyme, evenLine) {
 		prevPrevWord = temp[temp.length - 2]
 	if (temp.length > 0)
 		prevWord = temp[temp.length - 1]
-	
+
 	// use pair rhymes to figure out rhyme word
 	if (pairRhyme && lastLine.length > 0)
 		rhymeWord = lastLine[lastLine.length - 1]
@@ -138,18 +143,18 @@ function getNextLine(penLastLine, lastLine, pairRhyme, evenLine) {
 	}
 
 	// find path to next rhyming word -----------------
-	
+
 	// we just did a pair rhyme
 	if (pairRhyme && !needPairRhyme) {
 		rhymeWord = ""
 	}
-	// we just did a cross rhyme 
+	// we just did a cross rhyme
 	if (!pairRhyme && (evenLine && !needEvenRhyme || !evenLine && !needOddRhyme))
 		rhymeWord = ""
 
 	var nextLineList = []
 	for (var i = 0; i < numPaths; i++) {
-		var res = dfs(prevWord, rhymeWord, rhymeListTemp, [], minLength, maxLength)
+		var res = dfs(prevPrevWord, prevWord, rhymeWord, rhymeListTemp, [], minLength, maxLength)
 		// store result
 		if (res.length > 0) {
 			nextLineList = res
@@ -163,15 +168,21 @@ function getNextLine(penLastLine, lastLine, pairRhyme, evenLine) {
 			if (!pairRhyme && !evenLine)
 				needOddRhyme = !needOddRhyme
 			// debug
-			console.log("Found a word rhyming with " + 
-				rhymeWord + ": " + nextLineList[nextLineList.length - 1])
+			console.log("Found a word rhyming with '" +
+				rhymeWord + "': '" + nextLineList[nextLineList.length - 1]) + "'"
 			break
 		}
 	}
 	// didn't find anything so just ignore rhyming
 	if (nextLineList.length == 0) {
-		console.log("didn't find any words rhyming with " + rhymeWord)
-		nextLineList = dfs(prevWord, "", rhymeListTemp, [], minLength, maxLength)
+		console.log("didn't find any words rhyming with '" + rhymeWord + "'")
+
+        // find anything
+		nextLineList = []
+        while (nextLineList.length == 0)
+            nextLineList = dfs(prevPrevWord, prevWord, "", rhymeListTemp, [], minLength
+                + Math.floor(Math.random() * (maxLength - minLength)), maxLength)
+
 		// reset rhyme counters
 		if (evenLine)
 			needEvenRhyme = true
@@ -202,10 +213,10 @@ nextLineEl.addEventListener("click", function() {
 	rhymeListLength = Number(rhymeListLengthEl.value)
 	numPaths = Number(numPathsEl.value)
 	var pair = rhymePatternEl.value == "pair"
-	
+
 
 	var text = textAreaEl.value
-	
+
 	// there is an empty string as its own line at the end
 	var lines = text.split(/\r?\n/)
 	var penLastLine = []
@@ -215,9 +226,20 @@ nextLineEl.addEventListener("click", function() {
 		penLastLine = lines[lines.length - 3].split(" ")
 	if (lines.length > 1)
 		lastLine = lines[lines.length - 2].split(" ")
-	
+
 	var evenLine = lines.length % 2 != 0
 
 	var nextLine = getNextLine(penLastLine, lastLine, pair, evenLine)
 	textAreaEl.value = text + nextLine
 })
+
+clearButtonEl.addEventListener("click", function() {
+    textAreaEl.value = ""
+    needOddRhyme = false
+    needEvenRhyme = false
+    needPairRhyme = false
+})
+
+alphaEl.oninput = function() {
+  sliderValueEl.innerHTML = Math.round(Number(this.value) * 100) + "%";
+}
