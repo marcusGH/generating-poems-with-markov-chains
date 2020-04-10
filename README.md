@@ -1,8 +1,6 @@
 # An attempt at generating poems using Markov Chains
 
-For the English poems, I used books tagged with "poetry" from Project Gutenberg. Download the `ndjson` file from http://static.decontextualize.com/gutenberg-poetry-v001.ndjson.gz and run `gutenberg-scraper.py` to extract the different poems.
-
-For the Norwegian poems, I used Henrik Wergeland's poem collections found at https://dikt.org. Run `scraper.py` if you want to use them as well.
+I used poem collections from [Project Gutenberg](https://www.gutenberg.org/) to train both a first order and second order [Markov Chain](https://en.wikipedia.org/wiki/Markov_chain) model. This was done in `Java`. I then extracted the transition probabilities to JSON format for the demo. Using [words](https://github.com/words)'s javascript [rhyming library](https://github.com/words/rhymes), I'm able to determine which words rhyme with the last word on some line, so we can do a depth first search using the transition probabilities from the markov chain model to find a path (a sentence) to a word that rhymes with the last word on some other line.
 
 ## Example poem
 
@@ -10,8 +8,4 @@ For the Norwegian poems, I used Henrik Wergeland's poem collections found at htt
 
 ## How to use
 
-...
-
-## Demo
-
-Demo available at https://marcusgh.github.io/poem-generator/main.html
+Demo available at https://marcusgh.github.io/poem-generator/main.html. Click the "Next Line" button to generate a line of poetry.
