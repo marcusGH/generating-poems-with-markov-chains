@@ -5,7 +5,15 @@ import java.util.*;
 
 public class DataPreparation {
 
-    //Set<String> ignoreList = new HashSet<>(Arrays.asList(".", ":", ";", "", "--", ))
+    /**
+     * Takes a set of paths and returns a list of tokenized poems. If words are marked
+     * by the word, "eol", it should have a line separator character following it.
+     *
+     * @param paths the set of paths from which a poem text file can be located at
+     * @return  a set of poems -- a list of strings where each
+     *          string represents a single (compound word)
+     * @throws IOException  in case finding the files or reading them goes wrong
+     */
     public static Set<List<String>> loadPoems(Set<Path> paths) throws IOException {
         Set<List<String>> result = new HashSet<>();
 

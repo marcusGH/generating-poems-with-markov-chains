@@ -8,28 +8,56 @@ import java.util.*;
 public class MarkovChain {
     private final double alpha = 0.9;
 
-    private Pair<Map<String, List<Pair<String, Double>>>, Map<MCState, ArrayList<Pair<String, Double>>>> transitionProbabilities;
+    /**
+     * The training data is stored here as well.
+     * The first order transition probabilities only use a single word as a key,
+     *      so the corresponding map only uses a string.
+     * The second order transition probabilities use the previous two words as a key,
+     *      so a custom MCState is used. {@see MCState}
+     */
+    private Set<List<String>> trainingData;
+    private Map<String, List<Pair<String, Double>>> firstOrderTransitionProbabilities;
+    private Map<MCState, List<Pair<String, Double>>> secondOrderTransitionProbabilities;
 
+    /**
+     * Trains the model by calculating first- and second order transition probabilities
+     * based on the poems passed to it
+     * @param poems the set of poems that will be used as training data. Must already be tokenized and
+     *              processed
+     */
     public MarkovChain(Set<List<String>> poems) {
-        this.transitionProbabilities = getTransitionProbabilities(poems);
+        this.trainingData = poems;
     }
 
+    /**
+     * Auxiliary predicative that tells us if a word is an EOL word
+     * @param s the string to test for
+     * @return whether the string is an EOL word
+     */
     private boolean isEOL(String s) {
         return s.endsWith("\n");
     }
 
-//    private ArrayList<String> makeList(String ... strings) {
-//        return new ArrayList<>(Arrays.asList(strings));
-//    }
-
+    /**
+     * @return the first order transition probabilities
+     */
     public Map<String, List<Pair<String, Double>>> firstOrders() {
-        return this.transitionProbabilities.first;
+        return this.firstOrderTransitionProbabilities;
     }
 
-    public Map<MCState, ArrayList<Pair<String, Double>>> secondOrders() {
-        return this.transitionProbabilities.second;
+    /**
+     * @return the second order transition probabilities
+     */
+    public Map<MCState, List<Pair<String, Double>>> secondOrders() {
+        return this.secondOrderTransitionProbabilities;
     }
 
+    /**
+     * Creates a javascript file with a single variable that stored the
+     * transition probabilities of both the first- and second-order model
+     * in JSON format.
+     * @throws IOException if some bad stuff happens
+     */
     public void generateJSDictionary() throws IOException {
         // create the files
         final String dataDirectory = "website/data2/";
@@ -52,7 +80,7 @@ public class MarkovChain {
 
         // get the dictionaries
         Map<String, List<Pair<String, Double>>> firstOrders = this.firstOrders();
-        Map<MCState, ArrayList<Pair<String, Double>>> secondOrders = this.secondOrders();
+        Map<MCState, List<Pair<String, Double>>> secondOrders = this.secondOrders();
 
         // make first orders first
         fw1.write("var firstOrder = {\n");
@@ -94,7 +122,11 @@ public class MarkovChain {
         fw2.close();
     }
 
-    public Pair<Map<String, List<Pair<String, Double>>>, Map<MCState, ArrayList<Pair<String, Double>>>> getTransitionProbabilities(Set<List<String>>  poems) {
+    /**
+     * Trains the first- and second-order model using the training data given
+     * during construction. {@see #MarkovChain}
+     */
+    public void generateTransitionProbabilities() {
         // transitions from this state
         Map<MCState, Double> transFromWordState = new HashMap<>();
         // transitions from state i to state j
@@ -111,10 +143,13 @@ public class MarkovChain {
         regVocab.put("", 1);
         eolVocab.put("", 1);
 
+
+        // NOTE: Counting necessary transitions --------------------------------------------------------------
+
         int i = 0;
         // go through training set
-        for (List<String> p : poems) {
-            System.out.println(i++ + " poems out of " + poems.size() + " scanned.");
+        for (List<String> p : trainingData) {
+            System.out.println(i++ + " poems out of " + trainingData.size() + " scanned."); // for debugging
             // special EOL state
             String eolWord = "";
             // special state for first two words;
@@ -137,49 +172,45 @@ public class MarkovChain {
 
                 // record previous state
                 MCState prevWordState = new MCState(prevPrevWord, prevWord);
-//                List<String> prevWordState = new ArrayList<String>(Arrays.asList(prevPrevWord,prevWord));
                 // figure out current state
                 MCState curWordState = new MCState(prevWord, s);
-//                List<String> curWordState = new ArrayList<String>(Arrays.asList(prevWord,s));
 
-                // remember to -debug !!
-                //System.out.println("|" +curState+"|");
-
-                // count first order transitions
+                // count first order transitions, by first handling KeyErrors...
                 if (!firstOrderTrans.containsKey(prevWord))
                     firstOrderTrans.put(prevWord, new HashMap<>());
                 if (!firstOrderTrans.get(prevWord).containsKey(s))
                     firstOrderTrans.get(prevWord).put(s, 0.0);
+                // then actually incrementing the counter
                 firstOrderTrans.get(prevWord).put(s, firstOrderTrans.get(prevWord).get(s) + 1);
 
-                // count transition from prevState
+                // count transition from prevState, by handling KeyErrors...
                 if (!transFromWordState.containsKey(prevWordState))
                     transFromWordState.put(prevWordState, 0.0);
+                // then incrementing
                 transFromWordState.put(prevWordState, transFromWordState.get(prevWordState) + 1.0);
 
-                // count trans from and to
+                // count second order transitions, by first handling KeyErrors....
                 MCState mergedState = new MCState(prevPrevWord, prevWord, prevWord, s);
-//                List<String> mergedState = new ArrayList<>(prevWordState);
-//                mergedState.addAll(curWordState);
                 if (!transFromToWordState.containsKey(mergedState))
                     transFromToWordState.put(mergedState, 0.0);
+                // then incrementing
                 transFromToWordState.put(mergedState, transFromToWordState.get(mergedState) + 1.0);
 
-                // count trans from EOL words
+                // count trans from EOL words, by handling KeyErrors
                 MCState eolWordState = new MCState(eolWord);
                 if (!transFromEOLWord.containsKey(eolWordState))
                     transFromEOLWord.put(eolWordState, 0.0);
-                transFromEOLWord.put(eolWordState,
-                        transFromEOLWord.get(eolWordState) + 1.0);
+                // then incrementing
+                transFromEOLWord.put(eolWordState, transFromEOLWord.get(eolWordState) + 1.0);
 
                 // count trans from EOL to current word
                 MCState eolToCurState = new MCState(eolWord, s);
-//                List<String> eolToCurState = new ArrayList<>(Arrays.asList(eolWord, s));
                 if (!transFromToEOLWord.containsKey(eolToCurState))
                     transFromToEOLWord.put(eolToCurState, 0.0);
+                // increment
                 transFromToEOLWord.put(eolToCurState, transFromToEOLWord.get(eolToCurState) + 1.0);
 
-                // update words
+                // update words for the next iteration
                 if (isEOL(prevWord))
                     eolWord = prevWord;
                 prevPrevWord = prevWord;
@@ -187,12 +218,14 @@ public class MarkovChain {
             }
         }
 
-        // NOTE: calculating transition probabilities
+        // NOTE: calculating transition probabilities -----------------------------------------
 
-        Map<MCState, ArrayList<Pair<String, Double>>> secondOrderTransitionProbs = new HashMap<>();
+        // second order transition probabilities
+        Map<MCState, List<Pair<String, Double>>> secondOrderTransitionProbs = new HashMap<>();
 
-        int counter = 0;
+        int counter = 0;    // for debugging
         for (MCState ABBC : transFromToWordState.keySet()) {
+            // debug purposes
             if (counter % 1000 == 0)
                 System.out.println("Calculated probabilities from " + (counter++) +
                         " states out of " + transFromToWordState.size() + "\n\t" +
@@ -200,115 +233,38 @@ public class MarkovChain {
                         " free heapspace available: " + (Runtime.getRuntime().maxMemory() -
                         Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()));
             else
-                counter++;
+                counter++;    // debugging
+
             // first two words
             MCState AB = ABBC.firstTwo();
             // cur word
             String C = ABBC.fourth();
 
-            // calculate 2nd order markov transition
+            // calculate 2nd order transition probability without smoothing
             double transToCProb = (transFromToWordState.get(ABBC) / transFromWordState.get(AB));
+            // store it
             if (!secondOrderTransitionProbs.containsKey(AB))
                 secondOrderTransitionProbs.put(AB, new ArrayList<>());
             secondOrderTransitionProbs.get(AB).add(new Pair<>(C, transToCProb));
-
-            // calculate transitions from EOLs
-//            for (String eol : eolVocab) {
-//                MCState eolCurWord = new MCState(eol, C);
-//                MCState eolState = new MCState(eol);
-//
-//                double transEolCProb;
-//                if (transFromToEOLWord.containsKey(eolCurWord))
-//                    transEolCProb = (transFromToEOLWord.get(eolCurWord) + 1) /
-//                            (transFromEOLWord.get(eolState) + (double)regVocab.size());
-//                // no transition but there is something from the eol word, so apply smoothing
-//                else if (transFromEOLWord.containsKey(eolState)) {
-//                    transEolCProb = 0 / (transFromEOLWord.get(eolState) + (double)regVocab.size());
-//                }
-//                else
-//                    transEolCProb = 0;
-//
-//                // fuzzy compare
-//                if (transEolCProb > 0.00001) {
-//                    //record prob
-//                    MCState fromState = new MCState(eol, AB.first(), AB.second());
-//                    if (!transitionProbabilities.containsKey(fromState))
-//                        transitionProbabilities.put(fromState, new ArrayList<>());
-//                    transitionProbabilities.get(fromState).
-//                            add(new Pair<>(C, transToCProb * transEolCProb));
-//                }
-//            }
         }
 
-        // NOTE : calculate first order transitions
+        // first order transition probabilities
         Map<String, List<Pair<String, Double>>> firstOrderTransitionProbs = new HashMap<>();
+
         for (String s : firstOrderTrans.keySet()) {
             for (String w : firstOrderTrans.get(s).keySet()) {
+                // calculate transition probability without smoothing
                 double prob = firstOrderTrans.get(s).get(w) / (regVocab.get(s) + eolVocab.get(s));
                 // nothing added before
                 if (!firstOrderTransitionProbs.containsKey(s))
                     firstOrderTransitionProbs.put(s, new ArrayList<>());
+                // store it
                 firstOrderTransitionProbs.get(s).add(new Pair<>(w, prob));
             }
         }
-        return new Pair<>(firstOrderTransitionProbs, secondOrderTransitionProbs);
-    }
 
-    public String generatePoem(int len, double alpha) {
-        // previous words
-        String prevPrevWord = "";
-        String prevWord = "";
-        String eolWord = "";
-
-        StringBuilder poem = new StringBuilder("");
-
-        for (int i = 0; i < len; i++) {
-            // determine if we're doing first order or second order
-            double rand = Math.random();
-            // possible next words
-            List<Pair<String, Double>> nextWords;
-            // use first order
-            if (rand < alpha)
-                nextWords = this.transitionProbabilities.second.get(new MCState(prevPrevWord, prevWord));
-            else
-                nextWords = this.transitionProbabilities.first.get(prevWord);
-            // the next word
-            String next = "";
-
-            if (nextWords == null)
-                break;
-            // debug the size
-            System.out.print(nextWords.size() + " ");
-
-            // total probability
-            double totalProb = nextWords.stream().map(p -> p.second).reduce(0.0, Double::sum);
-            // generate random number in range [0, totalProb)
-            rand = Math.random() * totalProb;
-            // go through list and decide which word to use
-            double prevAccumProb = 0.0;
-            for (Pair<String, Double> p : nextWords) {
-                // use the word
-                if (rand < prevAccumProb + p.second) {
-                    next = p.first;
-                    break;
-                }
-                else
-                    prevAccumProb += p.second;
-            }
-
-            // add the word
-            poem.append(next).append(" ");
-            // update words
-            prevPrevWord = prevWord;
-            prevWord = next;
-            if (isEOL(next))
-                eolWord = next;
-        }
-        System.out.println("");
-
-        return poem.toString();
-    }
-
-    public static void main(String[] args) {
+        // finally store the results
+        this.firstOrderTransitionProbabilities = firstOrderTransitionProbs;
+        this.secondOrderTransitionProbabilities = secondOrderTransitionProbs;
     }
 }
