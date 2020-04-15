@@ -1,0 +1,232 @@
+/*Blue grey: #607D8B #ECEFF1 #CFD8DC #B0BEC5 #90A4AE #78909C #607D8B #546E7A #455A64 #37474F #263238 */
+
+* {
+    box-sizing: border-box;
+}
+
+/* mobiltelefon eller veldig liten skjerm */
+[class*="col-"] {
+    width: 100%;
+    float: left;
+    padding: 15px;
+}
+
+.no-padding {
+    padding: 0 !important;
+}
+
+@media only screen and (min-width: 600px) {
+    /*litt mindre skjerm*/
+    .col-m-1 {width: 8.33%;}
+    .col-m-2 {width: 16.66%;}
+    .col-m-3 {width: 25%;}
+    .col-m-4 {width: 33.33%;}
+    .col-m-5 {width: 41.66%;}
+    .col-m-6 {width: 50%;}
+    .col-m-7 {width: 58.33%;}
+    .col-m-8 {width: 66.66%;}
+    .col-m-9 {width: 75%;}
+    .col-m-10 {width: 83.33%;}
+    .col-m-11 {width: 91.66%;}
+    .col-m-12 {width: 100%;}
+}
+
+@media only screen and (min-width: 768px) {
+    /*stor skjerm*/
+    .col-1 {width: 8.33%;}
+    .col-2 {width: 16.66%;}
+    .col-3 {width: 25%;}
+    .col-4 {width: 33.33%;}
+    .col-5 {width: 41.66%;}
+    .col-6 {width: 50%;}
+    .col-7 {width: 58.33%;}
+    .col-8 {width: 66.66%;}
+    .col-9 {width: 75%;}
+    .col-10 {width: 83.33%;}
+    .col-11 {width: 91.66%;}
+    .col-12 {width: 100%;}
+}
+
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+
+/*andre fine stilting*/
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+body {
+    font-family: "Century Gothic", Arial, sans-serif;
+    font-size: 100%;
+    background-color: #efefef;
+    color: #263238;
+}
+
+table, th, td {
+    border: 1px solid #000;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 6px;
+    text-align: center;
+}
+
+#main-frame {
+    color: #000;
+
+}
+
+#parameters > div.even {
+    background-color:#cfcfcf;
+    /*margin: 0 -30px 0 -30px;*/
+}
+
+#parameters > div.odd {
+    background-color: #9e9e9e;
+}
+
+.header {
+    width: 100%;
+    margin-top: -15px;
+    margin-left: -20px;
+    margin-right: 20px;
+    background-color:#8d8d8d;
+    color: #263238;
+    text-align: center;
+}
+
+input[type="text"], input[type="number"], input[type="password"], select {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 2px solid #C5CAE9;
+    border-radius: 4px;
+    box-shadow: 2px 2px 8px #aaa;
+}
+
+select {
+    background-color: #E8EAF6;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus {
+    border: 2px solid #3F51B5;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+}
+
+input[type=button], input[type=submit], input[type=reset], button {
+    background-color: #3F51B5;
+    border: none;
+    color: #E8EAF6;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin: 0 auto;
+    display: block;
+}
+
+button:active, input[type="button"]:active, input[type=submit]:active {
+    color: #3F51B5;
+    background-color: #E8EAF6;
+}
+
+textarea {
+    width: 100%;
+    height: 2000px;
+}
+
+/* slider */
+.slidecontainer {
+    margin-top: 5px;
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: #9e9e9e;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #3F51B5;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #3F51B5;
+  cursor: pointer;
+}
+
+/* tooltips */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 320px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+#address {
+    position:fixed;
+    bottom: 5px;
+    right: 10px;
+    text-align: left;
+}

@@ -1,37 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Generating poems with Markov Chains</title>
+</head>
 <body>
+    <div class="row">
+        <div class="col-12 col-m-12 header">
+            <h1>Generating poems with Markov Chains</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-8 col-m-12" id="main-frame">
 
-<h1>Generating English Poems with Markov Chains</h1>
+            <div class="row">
+                <div class="col-8">
+                    <textarea id="textarea"></textarea>
+                </div>
+                <div class="col-4" id="parameters">
+                    <div class="row even">
+                        <div class="col-12">
+                            <div class="tooltip">Order slider (<span id="alpha">90%</span>)
+                                <span class="tooltiptext">
+                                    The proportion of transitions that the program attempts to use 2nd order markov
+                                    chains on rathar than 1st order markov chain transitions. Pulling the slider all
+                                    the way to the right thus gives better fluency, but less originality.
+                                </span>
+                            </div>
+                            <br>
+                            <div class="slidecontainer">
+                              <input type="range" min="0" max="1" value="0.9" step="0.01" class="slider" id="alpha">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row odd">
+                        <div class="col-12">
 
-<button id="nextLine">Next Line</button>
-<br>
-Order slider (all left means only 1st order, all right means only 2nd order markov chains)
-<div class="slidecontainer">
-  <input type="range" min="0" max="1" value="0.9" step="0.01" class="slider" id="alpha">
-</div>
-<br>
-Minimum line length
-<input type="number" id="minLineLength" name="minLineLength" min="1" value="8">
-<br>
-Maximum line length
-<input type="number" id="maxLineLength" name="maxLineLength" min="1" value="18">
-<br>
-Maximum rhyme list length
-<input type="number" id="rhymeListLength" name="rhymeListLength" min="0" value="200">
-<br>
-Number of paths searched
-<input type="number" id="pathNum" name="pathNum" min="1" value="10000">
-<br>
-Rhyme pattern
-<select id="rhymePattern">
-	<option value="pair">Pair rhymes</option>
-	<option value="cross">Cross rhymes</option>
-</select>
+                            Minimum line length
 
-<br>
-<textarea id="textarea" rows="80" cols="160"></textarea>
+                            <input type="number" id="minLineLength" name="minLineLength" min="2" value="8">
+                        </div>
+                    </div>
+                    <div class="row even">
+                        <div class="col-12">
+                            Maximum line length
+                            <input type="number" id="maxLineLength" name="maxLineLength" min="2" value="15">
+                        </div>
+                    </div>
+                    <div class="row odd">
+                        <div class="col-12">
+                            <div class="tooltip">
+                            Maximum rhyme list length
+                            <span class="tooltiptext">
+                                The maximum number of rhyming words that are considered. Lowering this
+                                gives better rhymes, but decreasing the chance of a rhyme word being found.
+                            </span>
+                            </div>
 
+                            <input type="number" id="rhymeListLength" name="rhymeListLength" min="0" value="20">
+                        </div>
+                    </div>
+                    <div class="row even">
+                        <div class="col-12">
+                            <div class="tooltip">
+                            Number of paths searched
+                            <span class="tooltiptext">
+                                The program does a probabilistic depth first search until it finds a line ending
+                                with a word that rhymes. This parameter thus decides
+                                how many paths are attempted before the program gives up on finding a path
+                                leading to a rhyme word.
+                            </span>
+                            </div>
+                            <input type="number" id="pathNum" name="pathNum" min="1" value="10000">
+                        </div>
+                    </div>
+                    <div class="row odd">
+                        <div class="col-12">
+                            <div class="tooltip">
+                            Rhyme pattern
+                            <span class="tooltiptext">
+                                "Pair rhymes" gives the pattern "aabbcc" whereas "cross rhymes" gives the
+                                rhyming pattern "abab"
+                            </span>
+                            </div>
+
+                            <select id="rhymePattern">
+                            	<option value="pair">Pair rhymes</option>
+                            	<option value="cross">Cross rhymes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row even">
+                        <div class="col-6">
+                            <button id="nextLine">Next Line</button>
+                        </div>
+                        <div class="col-6">
+                            <button id="clear">Clear</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-2"></div>
+    </div>
+
+    <address id="address">
+        Made by <a href="https://github.com/marcusGH">Marcus</a>. You can find the source code
+        <a href="https://github.com/marcusGH/generating-poems-with-markov-chains">here</a>.
+    </address>
 <!-- necessary scripts -->
 <script src="data2/firstOrder.js"></script>
 <script src="data2/secondOrder.js"></script>
